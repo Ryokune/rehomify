@@ -89,11 +89,13 @@
                 requires = [ "nix-daemon.service" ];
                 before = [ "systemd-user-sessions.service" ];
 
-                unitConfig.ConditionPathIsExecutable = "${user.home}/.local/state/nix/profiles/home-manager/activate";
+                unitConfig = {
+                  ConditionFileIsExecutable = "${user.home}/.local/state/nix/profiles/home-manager/activate";
+                  RequiresMountsFor = [ user.home ];
+                };
 
                 serviceConfig = {
                   Type = "oneshot";
-                  requiresMountsFor = [ user.home ];
                   User = name;
                   ExecStart = "${user.home}/.local/state/nix/profiles/home-manager/activate";
                 };
