@@ -7,6 +7,7 @@
       nixosModules.rehomify =
         {
           config,
+          options,
           lib,
           pkgs,
           ...
@@ -14,7 +15,9 @@
         let
           cfg = config.rehomify;
 
-          persistenceEnabled = config.environment.persistence != { };
+          persistenceEnabled =
+            (options.environment.persistence or null != null && config.environment.persistence != { })
+            || (options.preservation or null != null && config.preservation.enable);
 
           normalUsers = lib.filterAttrs (
             name: user: user.isNormalUser or false && name != "root"
