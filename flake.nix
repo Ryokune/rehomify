@@ -100,7 +100,20 @@
                 serviceConfig = {
                   Type = "oneshot";
                   User = name;
-                  ExecStart = "${user.home}/.local/state/nix/profiles/home-manager/activate";
+                  Group = "users";
+                  ExecStart = pkgs.writeShellScript "rehomify-secure-activate-${name}" ''
+                    TARGET_PROFILE=$(readlink -f "${user.home}/.local/state/nix/profiles/home-manager")
+                    ACTIVATE_SCRIPT="$TARGET_PROFILE/activate"
+
+                    if [ -x "$ACTIVATE_SCRIPT" ]; then
+                      echo "Rehomify: Activating store path $ACTIVATE_SCRIPT for user ${name}"
+                      
+                      exec "$ACTIVATE_SCRIPT"
+                    else
+                      echo "Rehomify Error: Resolved path $ACTIVATE_SCRIPT is not executable."
+                      exit 1
+                    fi
+                  '';
                 };
                 path = with pkgs; [ nix ];
 
